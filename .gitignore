@@ -91,7 +91,7 @@ Git-Ops.md
 .env.development
 .env.test
 .env.production
-
+.env-vercel
 # Build and cache directories
 dist/
 build/
