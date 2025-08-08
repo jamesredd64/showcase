@@ -1,0 +1,123 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Important files that should NOT be ignored
+!CHANGELOG.md
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# docs
+docs
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Development and backup directories
+_Dev/
+fe-saved/
+**/fe-saved/
+repo-backup/
+repo-backup*/
+.saved/
+**/.saved/
+user cards*/
+user cards/
+
+# Security and Environment
+.env
+.env.local
+.env.*.local
+.env.development
+.env.test
+.env.production
+
+# Build directories
+/dist
+/build
+/.vercel
+
+# Cache directories
+.cache
+.temp
+.vercel
+
+# Development and backup directories
+_Dev/
+**/fe-saved/
+**/_Dev/
+**/vite-frontend/
+
+# Specific backup patterns
+fe-saved/
+fe-saved*/
+**/fe-saved/**
+repo-backup/
+repo-backup*/
+
+# Test and development files
+*.test.tsx
+*.test.ts
+test.tsx
+TestPage.tsx
+TestMongoDB.tsx
+Git-Ops.md
+
+# VS Code workspace settings
+.vscode/*
+!.vscode/extensions.json
+*.code-workspace
+
+# Environment files
+.env
+.env.local
+.env.*.local
+.env.development
+.env.test
+.env.production
+
+# Build and cache directories
+dist/
+build/
+.vercel/
+.cache/
+.temp/
+
+# If these files are already tracked, run:
+# git rm -r --cached _Dev/
+# git rm -r --cached fe-saved/
+.saved/UserProfiles-old.tsx
+.saved/UserProfiles-old-new.tsx
+.saved/test.css
+src/pages/DemoApp.tsx
+src/pages/oldProfile.tsx
+scripts/migrate-roles.js
+src/console.log.md
+# src/components/ProtectedAdminRoute.tsx
+# src/components/ProtectedRoute.tsx
+src/components/admin/AdminCodeVerification.tsx
+src/components/admin/AdminManagement.tsx
+src/models/AdminCode.ts
+# src/pages/ProfilesPage.tsx
+src/components/common/WifiLoader.tsx
+
+# Add these lines to your .gitignore
+package-lock.json
+yarn.lock
+vite.config.ts

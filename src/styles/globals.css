@@ -1,0 +1,38 @@
+/* Calendar event colors */
+.bg-primary {
+  background-color: #1333ff; /* Updated to match our new brand blue */
+}
+
+.bg-success {
+  background-color: #28a745; /* Already working */
+}
+
+.bg-danger {
+  background-color: #ef4444; /* Updated to match our error-500 color */
+}
+
+.bg-warning {
+  background-color: #ffc107; /* Already working */
+}
+
+/* Dark mode variants */
+.dark .bg-primary {
+  background-color: #4d66ff; /* Using brand-400 for better visibility in dark mode */
+}
+
+.dark .bg-danger {
+  background-color: #f87171; /* Using error-400 for better visibility in dark mode */
+}
+
+/* Make calendar events more visible */
+.fc-event {
+  cursor: pointer;
+  padding: 2px;
+  margin: 1px 0;
+}
+
+.fc-event-title {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
