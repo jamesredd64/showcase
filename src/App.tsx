@@ -1,5 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-refresh/only-export-components */
+// App.tsx
+import { BrowserRouter } from 'react-router-dom';
+import AppRoutes from './pages/AppRoutes'; // or wherever you placed the dynamic routing component
+
+
 import { buildUserMetadata } from './utils/buildUserMetadata';
 import { Routes, Route, Navigate, useNavigate, useParams, Outlet } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
@@ -476,62 +481,28 @@ function App() {
     return <div className="text-center p-4">Authentication Error: {auth0Error.message}</div>;
   }
 
-  return (
+  
+      return (
+        // <BrowserRouter>
+        //   <AppRoutes />
+        // </BrowserRouter>
+     
+   
+  
     <NavigationContext.Provider value={{ handleNavigation, hasUnsavedChanges, setHasUnsavedChanges }}>
       <IdleTimeoutHandler />
       <div className="dark:bg-boxdark-2 dark:text-bodydark min-h-screen">
         <div className="flex h-screen overflow-hidden">
-          <div className="relative flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
-          <Routes>
-                <Route path="/signed-out" element={<SignedOut />} />
-                {/* <Route path="/" element={<Home />} />
-                <Route path="/dashboard" element={<Dashboard />} /> */}
-                {/* Handle Role-Based Navigation */}
-                <Route path="/" element={<RoleBasedRoute />} />
-
-                {/* Protected Routes */}
-                <Route element={<ProtectedRoute />}>
-                  {/* Admin Routes */}
-                  <Route path="/admin/*" element={<CustomAppLayout />}>
-                    <Route index element={<Navigate to="adm-dashboard" replace />} />
-                    <Route path="adm-dashboard" element={<AdminDashboard />} />
-                    <Route path="dashboard" element={<Home />} />
-                    <Route path="invite" element={<EventInvitation />} />
-                    <Route path="userman" element={<UserManagement />} />
-                    <Route path="profile" element={<ProfileView />} />
-                    <Route path="calendar" element={<Calendar />} />
-                    <Route path="marketing" element={<Marketing />} />
-                    <Route path="notif" element={<CreateNotification />} />
-                    <Route path="marketing-overview" element={<MarketingOverview />} />
-                    <Route path="customer-demographics" element={<CustomerDemographics />} />
-                    <Route path="changelog" element={<Changelog />} />
-                    <Route path="welcome" element={<NewUserWelcome />} />                    
-                    <Route path="sch-events" element={<ScheduledEventsPage />} />
-                    <Route path="send-email" element={<SendEmailPage />} />
-                  <Route path="settings-admin" element={<SettingsAdmin />} />  
-                  {/* <Route path="admin-settings" element={<AdminSettings />} />   */}
-                  
-                  </Route>
-
-                  {/* User Routes */}
-                  <Route path="/attendee/*" element={<AppLayout />}>
-                    <Route index element={<Navigate to="dashboard" replace />} />
-                    <Route path="dashboard" element={<NewUserWelcome />} />
-                    <Route path="profile" element={<ProfileView />} />
-                    
-                  </Route>                  
-                </Route>
-
-                {/* Catch All Route */}
-                <Route path="*" element={<NotFound />} />
-            </Routes>
+              <div className="relative flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
+              <AppRoutes />
+          
 
           </div>
         </div>
       </div>
     </NavigationContext.Provider>
   );
-}
+ }
 
 export default App;
 

@@ -1,90 +1,77 @@
 import { useRef, useState } from "react";
-// import { useAuth0 } from "@auth0/auth0-react";
-import { useSearch } from "../context/SearchContext";
-import { useCalendar } from '../context/CalendarContext';
-import { useNavigate } from "react-router-dom";
-
-import { Link } from "react-router-dom";
+import { useAuth0 } from "@auth0/auth0-react";
+import { useScheduledEvents } from "../context/ScheduledEventsContext";
+import { useNavigate, Link } from "react-router-dom";
 import { useSidebar } from "../context/SidebarContext";
-// import ThemeTogglerTwo from "../components/common/ThemeTogglerTwo";
 import { ThemeToggleButton } from "../components/common/ThemeToggleButton";
 import NotificationDropdown from "../components/header/NotificationDropdown";
 import UserDropdown from "../components/header/UserDropdown";
 
-// interface SearchResult {
-//   id: string;
-//   title: string;
-//   type: 'event';
-//   url: string;
-//   start?: string;
-//   end?: string;
-//   extendedProps: Record<string, unknown>;
-// }
+interface SearchResult {
+  id: string;
+  title: string;
+  type: 'event';
+  url: string;
+  start?: string;
+}
 
 const AppHeader: React.FC = () => {
-  // const { user } = useAuth0();
-  const { searchQuery, setSearchQuery, searchResults, setSearchResults } = useSearch();
+  const { user } = useAuth0();
+  const { scheduledEvents } = useScheduledEvents();
   const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
-  const { events } = useCalendar(); // This is already correctly imported
+  const [isApplicationMenuOpen, setApplicationMenuOpen] = useState(false);
+  const { isMobileOpen, toggleSidebar, toggleMobileSidebar } = useSidebar();
 
   const handleSearch = async (query: string) => {
     if (!query.trim()) {
       setSearchResults([]);
+      console.log('Searching for:',query.trim());
       return;
     }
 
     setIsSearching(true);
     try {
       const searchTerm = query.trim().toLowerCase();
-      console.log('Searching for:', searchTerm);
-      console.log('Total events available in context:', events.length);
-      
-      const filteredEvents = events.filter((event) => {
-        const title = (event.title || '').toLowerCase();
-        const description = (event.extendedProps?.description || '').toLowerCase();
-        const isMatch = title.includes(searchTerm) || description.includes(searchTerm);
-        if (isMatch) {
-          console.log('Found matching event:', event.title);
-        }
-        return isMatch;
+      const filteredEvents = scheduledEvents.filter((event) => {
+        const title = (event.eventDetails.summary || '').toLowerCase();
+        const description = (event.eventDetails.description || '').toLowerCase();
+        return title.includes(searchTerm) || description.includes(searchTerm);
       });
-      
-      console.log('Filtered events:', filteredEvents);
-      const formattedResults = filteredEvents.map(event => ({
-        id: event.id,
-        title: event.title,
-        type: 'event' as const, // Add type assertion to ensure it matches SearchResult type
-        url: `/admin/calendar/${event.id}`,
-        start: event.start,
-        end: event.end,
-        extendedProps: event.extendedProps
+      console.log('Searching for:', searchTerm);
+      console.log('Total events available in context:', filteredEvents.length);
+
+      const formattedResults: SearchResult[] = filteredEvents.map(event => ({
+        id: event._id,
+        title: event.eventDetails.summary,
+        type: 'event',
+        url: `/admin/calendar/${event._id}`,
+        start: event.eventDetails.scheduledTime,
       }));
+
       setSearchResults(formattedResults);
     } finally {
       setIsSearching(false);
     }
   };
 
-  // const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   const query = e.target.value;
-  //   setSearchQuery(query);
-  //   handleSearch(query); // Search on each keystroke
-  // };
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const query = e.target.value;
+    setSearchQuery(query);
+    handleSearch(query);
+  };
 
   const handleResultClick = (eventId: string) => {
-    console.log('Navigating to event:', eventId); // Add logging
-    
-    // Navigate to calendar page with the selected event
-    navigate('/calendar', { 
-      state: { 
+    navigate('/calendar', {
+      state: {
         selectedEventId: eventId,
         scrollToEvent: true
-      } 
+      }
     });
-    
-    // Clear the search
+
     if (inputRef.current) {
       inputRef.current.value = '';
     }
@@ -92,12 +79,8 @@ const AppHeader: React.FC = () => {
     setSearchResults([]);
   };
 
-  const [isApplicationMenuOpen, setApplicationMenuOpen] = useState(false);
-
-  const { isMobileOpen, toggleSidebar, toggleMobileSidebar } = useSidebar();
-
   const handleToggle = () => {
-    if (window.innerWidth >= 768) {  // Changed from 991 to 768 to match other components
+    if (window.innerWidth >= 768) {
       toggleSidebar();
     } else {
       toggleMobileSidebar();
@@ -117,7 +100,7 @@ const AppHeader: React.FC = () => {
       }
     }
   };
-  
+
   return (
     <header className="sticky top-0 flex w-full bg-white border-gray-200 z-99999 dark:border-gray-800 dark:bg-gray-900 lg:border-b z-[999999]">
       <div className="flex flex-col items-center justify-between grow lg:flex-row lg:px-6">

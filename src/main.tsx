@@ -14,6 +14,7 @@ import { ThemeProvider } from './context/ThemeContext';
 import { SearchProvider } from './context/SearchContext';
 import { CalendarProvider } from './context/CalendarContext';
 import { UnsavedChangesProvider } from './context/UnsavedChangesContext';
+import { ScheduledEventsProvider } from './context/ScheduledEventsContext';
 // import { useNavigate } from "react-router-dom";
 
 import { useAuth0} from '@auth0/auth0-react';
@@ -94,7 +95,10 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
                 <UnsavedChangesProvider>
                   <SidebarProvider>
                     <SearchProvider>
+                      <ScheduledEventsProvider>
+                      
                       <App />
+                       </ScheduledEventsProvider>                        
                     </SearchProvider>
                   </SidebarProvider>
                 </UnsavedChangesProvider>

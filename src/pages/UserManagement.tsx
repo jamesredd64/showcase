@@ -90,7 +90,7 @@ export default function UserManagement() {
   const [userMetadata] = useGlobalStorage<UserMetadata | null>('userMetadata', null);
   const isInitialMount = useRef(true);
   const { isLoading, isAuthenticated, getAccessTokenSilently } = useAuth0();
-  const { canAccess, loading: rbacLoading } = useRbac(userMetadata?.profile?.role || 'showcase_attendee'); // Assuming 'user' as a default role
+  const { canAccess, loading: rbacLoading } = useRbac(userMetadata?.profile?.role || 'showcase_team' || 'showcase_admin'); // Assuming 'user' as a default role
   const { getAllUsers, saveUserData } = useMongoDbClient();
     const [isModalOpen, setIsModalOpen] = useState(false); // State for modal visibility
 
@@ -584,14 +584,14 @@ export default function UserManagement() {
 
            {/* Actions Section */}
            <div className="mt-4 border-t border-gray-200 pt-3 dark:border-gray-700">
-                {canAccess('users', 'read') && ( // Check read permission for view details button
+                
                   <button
                       onClick={() => handleViewDetails(user.auth0Id)}
                       className="w-full rounded-md border border-primary px-3 py-1.5 text-center text-xs font-medium text-primary transition-colors hover:bg-primary/10 dark:hover:bg-primary/20"
                   >
                       View Details
                   </button>
-                )}
+               
            </div>
         </div>
       ))}
