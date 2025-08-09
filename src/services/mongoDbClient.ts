@@ -140,7 +140,7 @@ export const useMongoDbClient = () => {
       const encodedAuth0Id = encodeURIComponent(normalizedId);
       const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.USER_BY_ID(encodedAuth0Id)}`;
       
-      console.log('getUserById: Making request to:', url);
+      console.log('getUserById: Making request to from mongodb from mongodb:', url);
       
       const response = await fetch(url, {
         method: 'GET',
@@ -191,7 +191,7 @@ export const useMongoDbClient = () => {
       const headers = await getAuthHeaders();
       const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.ALL_USERS}`;
   
-      console.log("getAllUsers: Making request to:", url);
+      console.log("getAllUsers: Making request to from mongodb:", url);
   
       const response = await fetch(url, {
         method: "GET",
@@ -562,7 +562,7 @@ export const useMongoDbClient = () => {
       const headers = await getAuthHeaders();
       const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.SCHEDULED_EVENTS}`;
   
-      console.log("getAllScheduledEvents: Making request to:", url);
+      console.log("getAllScheduledEvents: Making request to from mongodb:", url);
   
       const response = await fetch(url, {
         method: "GET",

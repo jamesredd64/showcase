@@ -118,7 +118,7 @@ export default function UserManagement() {
       // const headers = await getAuthHeaders();
       const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.ALL_USERS}`;
   
-      console.log("fetchAllUsers: Making request to:", url);
+      console.log("fetchAllUsers: Making request to from ui:", url);
   
       const response = await fetch(url, {
         method: "GET",

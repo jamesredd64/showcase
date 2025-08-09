@@ -8,3 +8,5 @@ UserManagement PAge:
 
 ProfileView:
  a. isActive not saving!
+
+ ## Calendar Events - search is no longer finding the events (maybe because it was using calendar events and now it is scheduledEvents> )
