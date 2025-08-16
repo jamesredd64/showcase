@@ -14,8 +14,10 @@ import "../styles/calendar.css";
 import { useRef } from "react";
 import { useSearch } from "../context/SearchContext";
 import { useNavigate } from "react-router-dom";
-
 import type { CalendarEvent } from "../types/calendar.types";
+import { useScheduledEvents } from '../context/ScheduledEventsContext';
+import { useLocation } from 'react-router-dom';
+import type  FullCalendarApi  from '@fullcalendar/react';
 
 const CalendarPage: () => JSX.Element = () => {
   const { user } = useAuth0();
@@ -24,17 +26,69 @@ const CalendarPage: () => JSX.Element = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
-  // const inputRef = useRef<HTMLInputElement>(null);
-  // const { searchQuery, setSearchQuery, searchResults, setSearchResults } = useSearch();
-  // const [isSearching, setIsSearching] = useState(false);
-  //  const navigate = useNavigate();
+  const { setScheduledEvents } = useScheduledEvents();
+  const location = useLocation();
+  const selectedEventId = location.state?.selectedEventId;
+  const scrollToEvent = location.state?.scrollToEvent;
+  const navigate = useNavigate();
+  const calendarRef = useRef<FullCalendar | null>(null);
+  
+  useEffect(() => {
+    const state = location.state as {
+      selectedEventId?: string;
+      scrollToEvent?: boolean;
+    };
+    console.log("state  ", state);
+    console.log("state?.selectedEventId  ", state?.selectedEventId);
+    console.log("state?.scrollToEvent  ", state?.scrollToEvent);
+    console.log("calendarRef.current  ", calendarRef.current);
+    
+    if (state?.selectedEventId && state?.scrollToEvent && calendarRef.current) {
+      console.log("state?.selectedEventId && state?.scrollToEvent  ", state?.selectedEventId && state?.scrollToEvent);
+      // && calendarRef.current
+      // Use requestAnimationFrame to ensure DOM is ready
+      requestAnimationFrame(() => {
+        const calendar = calendarRef.current?.getApi();
+        console.log("calendar  ", calendar);
 
-  //  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   const query = e.target.value;
-  //   setSearchQuery(query);
-  //   handleSearch(query); // Search on each keystroke
-  // };
+        if (!calendar) return;
 
+        if (!state.selectedEventId) return;
+        const event = calendar.getEventById(state.selectedEventId);
+        if (!event) return;
+
+        // Go to the date of the event
+        calendar.gotoDate(event.start || new Date());
+
+        // Use setTimeout to ensure the calendar has updated
+        setTimeout(() => {
+          // First ensure selectedEventId exists
+          if (!state.selectedEventId) return;
+
+          // Get the event and cast it to include the el property
+          const event = calendar.getEventById(state.selectedEventId);
+          if (!event) return;
+
+          // Access the DOM element using getEl() method
+          const eventEl = document.getElementById(
+            `event-${state.selectedEventId}`
+          );
+          if (eventEl) {
+            eventEl.scrollIntoView({ behavior: "smooth", block: "center" });
+
+            // Highlight the event
+            event.setProp("backgroundColor", "#ffeb3b");
+
+            // Reset the highlight after a delay
+            setTimeout(() => {
+              event.setProp("backgroundColor", "");
+            }, 2000);
+          }
+        }, 100);
+      });
+    }
+  }, [location.state]);
+  
   const mapToCalendarEvent = (scheduledEvent: any) => {
     return {
       id: scheduledEvent._id,
@@ -66,7 +120,13 @@ const CalendarPage: () => JSX.Element = () => {
         setIsLoading(true);
         const fetchedScheduledEvents = await getAllScheduledEvents();
         const calendarEvents = fetchedScheduledEvents.map(mapToCalendarEvent);
+        console.log("fetchedScheduledEvents ", fetchedScheduledEvents);
+        console.log("Fetched calendarEvents ", calendarEvents);
+        // setEvents(fetchedScheduledEvents);
         setEvents(calendarEvents);
+        // Add new context and set events for search query
+        setScheduledEvents(fetchedScheduledEvents);
+        console.log("setScheduledEvents ", fetchedScheduledEvents);
         setIsInitialized(true);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to load events");
@@ -77,6 +137,8 @@ const CalendarPage: () => JSX.Element = () => {
 
     loadEvents();
   }, [user?.sub, events.length, isInitialized, getAllScheduledEvents]);
+
+  
 
   const renderEventContent = (eventInfo: EventContentArg): JSX.Element => {
     const currentView = "dayGridMonth";
@@ -215,65 +277,7 @@ const CalendarPage: () => JSX.Element = () => {
       return <div>No events to display.</div>;
   }
 
-  // const handleSearch = async (query: string) => {
-  //   if (!query.trim()) {
-  //     setSearchResults([]);
-  //     return;
-  //   }
-
-  //   setIsSearching(true);
-  //   try {
-  //     const searchTerm = query.trim().toLowerCase();
-  //     console.log('Searching for:', searchTerm);
-  //     console.log('Total events available in context:', events.length);
-      
-  //     const filteredEvents = events.filter((event) => {
-  //       const title = (event.title || '').toLowerCase();
-  //       const description = (event.extendedProps?.description || '').toLowerCase();
-  //       const isMatch = title.includes(searchTerm) || description.includes(searchTerm);
-  //       if (isMatch) {
-  //         console.log('Found matching event:', event.title);
-  //       }
-  //       return isMatch && event.id !== undefined; // Only include events with defined IDs
-  //     });
-      
-  //     console.log('Filtered events:', filteredEvents);
-  //     const formattedResults = filteredEvents.map(event => ({
-  //       id: event.id!, // Use non-null assertion since we filtered undefined IDs
-  //       title: event.title,
-  //       type: 'event' as const,
-  //       url: `/calendar/${event.id}`,
-  //       start: event.start,
-  //       end: event.end,
-  //       extendedProps: event.extendedProps
-  //     }));
-  //     setSearchResults(formattedResults);
-  //   } finally {
-  //     setIsSearching(false);
-  //   }
-  // };
- 
-
-
-  // const handleResultClick = (eventId: string) => {
-  //   console.log('Navigating to event:', eventId); // Add logging
-    
-  //   // Navigate to calendar page with the selected event
-  //   navigate('/calendar', { 
-  //     state: { 
-  //       selectedEventId: eventId,
-  //       scrollToEvent: true
-  //     } 
-  //   });
-    
-  //   // Clear the search
-  //   if (inputRef.current) {
-  //     inputRef.current.value = '';
-  //   }
-  //   setSearchQuery('');
-  //   setSearchResults([]);
-  // };
-
+  
   return (
     <>
       <PageMeta title="Calendar Display" description="Display-only Calendar Page" />
@@ -282,6 +286,7 @@ const CalendarPage: () => JSX.Element = () => {
       
         <div className="mx-auto max-w-full">
           <FullCalendar
+            ref={calendarRef}
             plugins={[dayGridPlugin, timeGridPlugin]}
             initialView="dayGridMonth"
             events={events}

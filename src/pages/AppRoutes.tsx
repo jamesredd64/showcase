@@ -1,4 +1,5 @@
 // AppRoutes.tsx
+import CalendarPage from '../pages/CalendarPage'; // adjust path as needed
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { roleRoutes } from '../routes/RoleRoutes';
 import AppLayout from "../layout/AppLayout";
@@ -13,20 +14,28 @@ const AppRoutes = () => {
     <Routes>
       <Route path="/signed-out" element={<SignedOut />} />
       <Route path="/" element={<RoleBasedRoute />} />
+      
+
 
       <Route element={<ProtectedRoute />}>
-        {Object.entries(roleRoutes).map(([role, routes]) => {
-          const layout = role === 'attendee' ? <AppLayout /> : <CustomAppLayout />;
-          return (
-            <Route key={role} path={`/${role}/*`} element={layout}>
-              <Route index element={<Navigate to={routes[0].path} replace />} />
-              {routes.map(({ path, element }) => (
-                <Route key={path} path={path} element={element} />
-              ))}
-            </Route>
-          );
-        })}
+  {Object.entries(roleRoutes).map(([role, routes]) => {
+    const layout = role === 'attendee' ? <AppLayout /> : <CustomAppLayout />;
+    return (
+      <Route key={role} path={`/${role}/*`} element={layout}>
+        <Route index element={<Navigate to={routes[0].path} replace />} />
+        {routes.map(({ path, element }) => (
+          <Route key={path} path={path} element={element} />
+        ))}
+
+        {/* ✅ Dynamic calendar route for admin */}
+        {role === 'admin' && (
+          <Route path="calendar/:eventId" element={<CalendarPage />} />
+        )}
       </Route>
+    );
+  })}
+</Route>
+
 
       <Route path="*" element={<NotFound />} />
     </Routes>

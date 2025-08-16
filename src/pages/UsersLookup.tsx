@@ -11,9 +11,10 @@ interface UsersLookupProps {
   onUserSelect?: (selectedUsers: string[], users: User[]) => void;
   onClose?: () => void;
   fetchOnLoad?: boolean;
+  fetchOnOpen?: boolean; // new prop
 }
 
-const UsersLookup: React.FC<UsersLookupProps> = ({ isModal = false, onUserSelect, onClose, fetchOnLoad = true }) => {
+const UsersLookup: React.FC<UsersLookupProps> = ({ isModal = false, onUserSelect, onClose, fetchOnLoad = true, fetchOnOpen = false }) => {
   const { isAuthenticated, getAccessTokenSilently } = useAuth0();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
@@ -70,10 +71,17 @@ const UsersLookup: React.FC<UsersLookupProps> = ({ isModal = false, onUserSelect
   }, [isAuthenticated, getAccessTokenSilently]);
 
   useEffect(() => {
-    if (fetchOnLoad) {
+    if (fetchOnLoad || fetchOnOpen) {
       fetchUsers();
     }
-  }, [fetchUsers, fetchOnLoad]);
+  }, [fetchUsers, fetchOnLoad, fetchOnOpen]);
+
+  
+  // useEffect(() => {
+  //   if (fetchOnLoad) {
+  //     fetchUsers();
+  //   }
+  // }, [fetchUsers, fetchOnLoad]);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
@@ -121,18 +129,42 @@ const UsersLookup: React.FC<UsersLookupProps> = ({ isModal = false, onUserSelect
   }
 
   const content = (
-    <div className={`rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-gray-900 sm:px-7.5 xl:pb-1 ${isModal ? 'border-0 shadow-none' : ''}`}>
+    <div className={`rounded-sm border border-stroke bg-white px-0 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-gray-900 sm:px-7.5 xl:pb-1 ${isModal ? 'border-0 shadow-none' : ''}`}>
       <div className="mb-2">
         <input
           type="text"
           value={searchTerm}
           onChange={handleSearch}
           placeholder="Search users..."
-          className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 rounded border-gray-300 text-primary focus:ring-primary dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+          className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-1 pr-0 rounded border-gray-300 text-primary focus:ring-primary dark:border-gray-600 dark:bg-gray-700 dark:text-white"
         />
       </div>
+      {fetchOnLoad && users.length === 0 && !loading && (
+        <div className="mb-6 flex items-center gap-5">
+          <button
+            onClick={fetchUsers}
+            className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-opacity-90 disabled:opacity-50"
+            disabled={loading}
+          >
+            {loading ? 'Loading Users...' : 'Load All Users'}
+          </button>
 
-      {!fetchOnLoad && users.length === 0 && !loading && (
+          {/* {isModal && (
+            <button
+              onClick={onClose}
+              className="px-4 py-2 border border-stroke rounded-lg hover:bg-gray-100 dark:border-strokedark dark:hover:bg-meta-4 dark:text-gray-300"
+            >
+              Cancel
+            </button>
+          )} */}
+        </div>
+      )}
+     
+
+
+
+      {/* {!fetchOnLoad && users.length === 0 && !loading && (
+      
         <div className="mb-6 text-center">
           <button
             onClick={fetchUsers}
@@ -142,7 +174,7 @@ const UsersLookup: React.FC<UsersLookupProps> = ({ isModal = false, onUserSelect
             {loading ? 'Loading Users...' : 'Load All Users'}
           </button>
         </div>
-      )}
+      )} */}
 
       {loading && <Loader />}
       
@@ -152,7 +184,7 @@ const UsersLookup: React.FC<UsersLookupProps> = ({ isModal = false, onUserSelect
 
       {users.length > 0 && (
         <>
-          <div className="mb-4 flex items-center justify-between"> {/* Use flex to align items */}
+          <div className="mb-4 flex items-center justify-start"> {/* Use flex to align items */}
             <label className="flex items-center gap-2">
               <input
                 type="checkbox"
@@ -167,14 +199,24 @@ const UsersLookup: React.FC<UsersLookupProps> = ({ isModal = false, onUserSelect
             {isModal && (
               <button
                 onClick={handleConfirmSelection}
-                className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-opacity-90 disabled:opacity-50"
+                className="px-4 py-2 m-5 bg-primary text-white rounded-lg hover:bg-opacity-90 disabled:opacity-50"
                 disabled={selectedUsers.length === 0}
               >
                 Select ({selectedUsers.length})
               </button>
             )}
+            <div>
+            {isModal && (
+                  <button
+                    onClick={onClose}
+                    className="px-4 py-2 border border-stroke rounded-lg hover:bg-primary hover:text-gray-700 dark:border-strokedark dark:hover:bg-meta-4 dark:text-gray-300"
+                  >
+                    Cancel
+                  </button>
+                )}
           </div>
-
+          </div>
+          
           <div className="space-y-2">
             {filteredUsers.map(user => (
               <div
@@ -201,18 +243,9 @@ const UsersLookup: React.FC<UsersLookupProps> = ({ isModal = false, onUserSelect
         </>
       )}
 
-      {isModal && (
-        <div className="mt-6 flex justify-end gap-4">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 border border-stroke rounded-lg hover:bg-gray-100 dark:border-strokedark dark:hover:bg-meta-4 dark:text-gray-300"
-          >
-            Cancel
-          </button>
-          {/* Select button moved to the top */}
+      
         </div>
-      )}
-    </div>
+        
   );
 
   if (isModal) {

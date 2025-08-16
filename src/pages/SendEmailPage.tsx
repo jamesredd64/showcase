@@ -16,13 +16,16 @@ const SendEmailPage: React.FC = () => {
   const [body, setBody] = useState('');
   const [isSending, setIsSending] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
-  const [showUserLookup, setShowUserLookup] = useState(true); // State to control visibility
+  const [showUserLookup, setShowUserLookup] = useState(false); // State to control visibility
 
   const [useTemplate, setUseTemplate] = useState(false); // State for "Use Template" checkbox
   const [selectedTemplateKey, setSelectedTemplateKey] = useState(''); // State for selected template key
   const [emailTemplates, setEmailTemplates] = useState<{ [key: string]: { subject: string, body: string } }>({}); // State for email templates
   const [loadingTemplates, setLoadingTemplates] = useState(true); // Add loading state
   const [templateError, setTemplateError] = useState<string | null>(null); // Add error state
+  const DISPLAY_LIMIT = 5; // or 10, depending on your preference
+  const [showPreview, setShowPreview] = useState(true);
+
 
   const availableTags = [
     "{{firstName}}",
@@ -33,8 +36,8 @@ const SendEmailPage: React.FC = () => {
 
   // Monitor template state changes
   useEffect(() => {
-    console.log('Current email templates state:', emailTemplates);
-    console.log('Loading templates:', loadingTemplates);
+    // console.log('Current email templates state:', emailTemplates);
+    // console.log('Loading templates:', loadingTemplates);
   }, [emailTemplates, loadingTemplates]);
 
   // Fetch email templates on component mount
@@ -112,13 +115,17 @@ const SendEmailPage: React.FC = () => {
   };
 
   const handleUserSelection = (selectedUserIds: string[], users: User[]) => {
-    console.log("Selected Users ", users);
+    console.log("✅ Selected User IDs:", selectedUserIds);
+    console.log("📦 Full User List:", users);
+  
+    // Update selected user IDs
     setSelectedUsers(selectedUserIds);
-    // Hide the lookup after selection
+  
+    // Hide the lookup modal
     setShowUserLookup(false);
-    // Filter the full list of users to get the details of the selected ones
-    const selectedUserDetails = users.filter(user => selectedUserIds.includes(user.auth0Id));
-    setAllUsers(selectedUserDetails.map(user => ({
+  
+    // Update allUsers with full list (not just selected)
+    setAllUsers(users.map(user => ({
       ...user,
       profile: {
         ...user.profile,
@@ -126,6 +133,7 @@ const SendEmailPage: React.FC = () => {
       },
     })));
   };
+  
 
   const handleUseTemplateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const checked = e.target.checked;
@@ -236,21 +244,59 @@ const SendEmailPage: React.FC = () => {
   
   const generateResponsiveEmail = (body: string) => {
     return `
-      <html>
-        <head>
-          <style>
-            body { font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; }
-            @media screen and (max-width: 480px) {
-              body { width: 100% !important; padding: 10px; }
-            }
-          </style>
-        </head>
-        <body class="email-container">
-          ${body}
-        </body>
-      </html>
+      <div style="
+        font-family: Arial, sans-serif;
+        padding: 20px;
+        margin: 0;
+      ">
+        ${body}
+      </div>
     `;
-  };   
+  };
+  
+
+  // const generateResponsiveEmail = (body: string) => {
+  //   return `
+  //     <html>
+  //       <head>
+  //         <style>
+  //           body {
+  //             font-family: Arial, sans-serif;
+  //             padding: 20px;
+  //             margin: 0;
+  //           }
+  //           @media screen and (max-width: 480px) {
+  //             body {
+  //               padding: 10px;
+  //             }
+  //           }
+  //         </style>
+  //       </head>
+  //       <body>
+  //         ${body}
+  //       </body>
+  //     </html>
+  //   `;
+  // };
+
+  
+  // const generateResponsiveEmail = (body: string) => {
+  //   return `
+  //     <html>
+  //       <head>
+  //         <style>
+  //           body { font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; }
+  //           @media screen and (max-width: 480px) {
+  //             body { width: 100% !important; padding: 10px; }
+  //           }
+  //         </style>
+  //       </head>
+  //       <body class="email-container">
+  //         ${body}
+  //       </body>
+  //     </html>
+  //   `;
+  // };   
   
   // Helper function to safely access nested properties
   // const getNestedValue = (obj: any, path: string): any => {
@@ -261,7 +307,11 @@ const SendEmailPage: React.FC = () => {
   //     return undefined;
   //   }, obj);
   // };
+  const handleCancel = () => {
+    setShowUserLookup(false);// or whatever state controls visibility
+  };
 
+  
   const replaceMergeFields = (template: string, user: User): string => {
     return template.replace(/\{\{\s*(\w+)\s*\}\}/g, (_, key) => {
       const value = getNestedValue(user, key);
@@ -282,10 +332,6 @@ const SendEmailPage: React.FC = () => {
   //   });
   // };
   
-  
-  
-  
-
   const handleSendEmail = async () => {
     if (selectedUsers.length === 0) {
       setMessage('Please select at least one user.');
@@ -368,51 +414,71 @@ const SendEmailPage: React.FC = () => {
   //     setIsSending(false);
   //   }
   // };
-
+  console.log('🧠 selectedUsers:', selectedUsers);
+  console.log('📦 allUsers:', allUsers);
+  console.log('🔢 selectedUsers.length:', selectedUsers.length);
+  console.log('🔢 allUsers.length:', allUsers.length);
+  
   return (
-    <div className="send-email-page bg-white px-5 pt-5 dark:border-gray-800 dark:text-gray-200 dark:bg-white/[0.02]">
-      <div>
-        <h1>Send Email to Users</h1>
+    <div className="send-email-page bg-white px-1 pt-2 dark:border-gray-800 dark:text-gray-200 dark:bg-white/[0.02]">
+      
+        <div className='flex flex-col sm:flex-row sm:items-baseline gap-4'>
+        <h1 className="text-xl font-semibold">Send Email to Users</h1>
 
-        <div className="mt-6">
-          <h2 className="text-lg font-semibold mb-4">Select Users</h2>
+             {/* <div className="mt-3"> */}
+             <button
+                onClick={() => setShowUserLookup(true)}
+                className="px-6 py-2 bg-primary ml-5 mt-1 text-white rounded-lg hover:bg-opacity-90 disabled:opacity-50"
+              >
+                Select
+            </button>
+        </div>
+        <div>
+          {/* <h2 className="text-lg font-semibold mb-4">Select Users</h2> */}
           {showUserLookup ? (
             /* Integrate UsersLookup directly */
             <UsersLookup
               isModal={true} // Render only the content part of UsersLookup
+              fetchOnOpen={false}
               onUserSelect={handleUserSelection}
               onClose={handleCloseLookup} // Pass the handler to close the lookup
-              fetchOnLoad={false} // Prevent fetching users on load
+              fetchOnLoad={true} // Prevent fetching users on load
               // Pass selectedUsers down to UsersLookup to maintain state if needed,
               // but UsersLookup manages its own selected state internally based on initial prop or user interaction.
               // Let's rely on UsersLookup's internal state for simplicity here.
             />
-          ) : (
+          ) : (         
+          
             <div className="mt-4">
-              <strong>Selected Users:</strong>{' '}
+                <strong>Selected Users:</strong>{' '}
+                
               {allUsers.length > 0 && selectedUsers.length === allUsers.length ? (
                 'All Users'
               ) : (
-                `${allUsers.length}`
-              )}
-              {selectedUsers.length > 0 && selectedUsers.length !== allUsers.length && (
-                <ul>
-                  {allUsers.map(user => (
-                    <li key={user.auth0Id}>{user.firstName} {user.lastName} ({user.email})</li>
-                  ))}
-                </ul>
-              )}
-              <button
-                onClick={() => setShowUserLookup(true)}
-                className="px-4 py-2 bg-primary ml-5 text-white rounded-lg hover:bg-opacity-90 disabled:opacity-50"
-              >
-                Select
-              </button>
+                 `${selectedUsers.length} selected`
+                )}
+                {selectedUsers.length > 0 && selectedUsers.length !== allUsers.length && (
+                  <ul className="mt-2 list-disc ml-6">
+                    {selectedUsers.slice(0, DISPLAY_LIMIT).map(userId => {
+                      const user = allUsers.find(u => u.auth0Id === userId);
+                      return user ? (
+                        <li key={user.auth0Id}>
+                          {user.firstName} {user.lastName} ({user.email})
+                        </li>
+                      ) : null;
+                    })}
+                    {selectedUsers.length > DISPLAY_LIMIT && (
+                      <li className="text-sm text-gray-500">
+                        +{selectedUsers.length - DISPLAY_LIMIT} more selected
+                      </li>
+                    )}
+                  </ul>
+                )}              
             </div>
           )}
-        </div>
+       </div>
 
-        <div className="mt-6">
+      <div className="mt-6">
           <h2 className="text-lg font-semibold mb-4">Email Content</h2>
           <div className="mb-4 flex items-center gap-4"> {/* Flex container for checkbox and dropdown */}
             <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -449,8 +515,9 @@ const SendEmailPage: React.FC = () => {
             )}
           </div>
         </div>
-
-        <div className="mb-4">
+        <div className="flex flex-col gap-6">
+      </div>
+      <div className="mb-4">
           <label htmlFor="subject" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
             Subject
           </label>
@@ -464,7 +531,6 @@ const SendEmailPage: React.FC = () => {
             // disabled={useTemplate} // Make subject input disabled if using template
           />
         </div>
-
         <div>
           <label htmlFor="body" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
             Body
@@ -477,25 +543,42 @@ const SendEmailPage: React.FC = () => {
             // readOnly={useTemplate} // Field is readonly but can be updated programmatically
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
             // disabled={useTemplate} // Make textarea disabled if using template
-          ></textarea>
+          ></textarea>       
+
+        </div>        
+        <div className="mt-6">
+        <div className="flex items-center justify-start ">
+          <h2 className="text-lg font-semibold">Email Preview</h2>
+          <button
+            onClick={() => setShowPreview(prev => !prev)}
+            className="text-sm text-blue-600 hover:underline focus:outline-none ml-5"
+          >
+            {showPreview ? 'Hide' : 'Show'}
+          </button>
         </div>
 
-        <div className="mt-6">
-          <button
-            onClick={handleSendEmail}
-            disabled={isSending || selectedUsers.length === 0 || !subject || !body}
-            className="px-4 py-2 border rounded bg-green-500 text-white hover:bg-green-600 disabled:opacity-50"
-          >
-            {isSending ? 'Sending...' : 'Send Email'}
-          </button>
+        {showPreview && (
+          <div
+            className="mt-4 border p-4 rounded-md bg-white dark:bg-gray-800 dark:text-gray-100 w-full overflow-auto"
+            dangerouslySetInnerHTML={{ __html: generateResponsiveEmail(body) }}
+          />
+        )}
+     </div>
+     <div className="mt-6">
+        <button
+          onClick={handleSendEmail}
+          disabled={isSending || selectedUsers.length === 0 || !subject || !body}
+          className="px-4 py-2 border rounded bg-green-500 text-white hover:bg-green-600 disabled:opacity-50"
+        >
+          {isSending ? 'Sending...' : 'Send Email'}
+        </button>
           {message && (
             <p className={`mt-4 text-sm ${message.includes('successfully') ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
               {message}
             </p>
           )}
-        </div>
       </div>
-    </div>
+      </div>
   );
 };
 

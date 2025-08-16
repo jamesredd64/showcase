@@ -48,8 +48,7 @@ const navItems: NavItem[] = [
       { name: "Event Calendar", path: "/admin/calendar", icon: <CalenderIcon /> },      
       { name: "Marketing Statistics", path: "/admin/marketing", icon: <InfoIcon /> },
       { name: "Profile", path: "/admin/profile", icon: <UserCircleIcon /> },
-      { name: "Send Event Invitations", path: "/admin/invite", icon: <TaskIcon /> },  
-        
+      { name: "Send Event Invitations", path: "/admin/invite", icon: <TaskIcon /> },          
       { name: "Scheduled Events History", path: "/admin/sch-events", icon: <TaskIcon /> },
       { name: "Send Users Email", path: "/admin/send-email", icon: <TaskIcon /> },
       { name: "User Administration", path: "/admin/userman", icon: <UserCircleIcon /> },

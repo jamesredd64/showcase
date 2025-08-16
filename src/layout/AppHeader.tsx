@@ -6,17 +6,30 @@ import { useSidebar } from "../context/SidebarContext";
 import { ThemeToggleButton } from "../components/common/ThemeToggleButton";
 import NotificationDropdown from "../components/header/NotificationDropdown";
 import UserDropdown from "../components/header/UserDropdown";
+import { useLocation } from 'react-router-dom';
 
-interface SearchResult {
-  id: string;
-  title: string;
+// interface SearchResult {
+//   id: string;
+//   title: string;
+//   summary: string;
+//   type: 'event';
+//   url: string;
+//   start?: string;
+// }
+
+// types/scheduledEvent.types.ts
+export interface SearchResult {
+  _id: string;
+  summary: string;
+  description: string; 
+  scheduledTime: string;
   type: 'event';
   url: string;
-  start?: string;
 }
 
+
 const AppHeader: React.FC = () => {
-  const { user } = useAuth0();
+  // const { user } = useAuth0();
   const { scheduledEvents } = useScheduledEvents();
   const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -25,6 +38,7 @@ const AppHeader: React.FC = () => {
   const [isSearching, setIsSearching] = useState(false);
   const [isApplicationMenuOpen, setApplicationMenuOpen] = useState(false);
   const { isMobileOpen, toggleSidebar, toggleMobileSidebar } = useSidebar();
+  const location = useLocation();
 
   const handleSearch = async (query: string) => {
     if (!query.trim()) {
@@ -35,28 +49,87 @@ const AppHeader: React.FC = () => {
 
     setIsSearching(true);
     try {
+      setIsSearching(true); // Start the search spinner or loading state
+    
       const searchTerm = query.trim().toLowerCase();
+    
+      if (!Array.isArray(scheduledEvents) || scheduledEvents.length === 0) {
+        console.log('🚫 No events found');
+        setSearchResults([]); // Clear previous results if no events
+        return;
+      }
+    
+      console.log('✅ Events loaded:', scheduledEvents);
+      console.log('🔍 Searching for:', searchTerm);
+      console.log('📦 Total scheduledEvents available in context:', scheduledEvents);
+    
       const filteredEvents = scheduledEvents.filter((event) => {
-        const title = (event.eventDetails.summary || '').toLowerCase();
+        const summary = (event.eventDetails.summary || '').toLowerCase();
         const description = (event.eventDetails.description || '').toLowerCase();
-        return title.includes(searchTerm) || description.includes(searchTerm);
+    
+        return summary.includes(searchTerm); 
+        // || description.includes(searchTerm);
       });
-      console.log('Searching for:', searchTerm);
-      console.log('Total events available in context:', filteredEvents.length);
-
-      const formattedResults: SearchResult[] = filteredEvents.map(event => ({
-        id: event._id,
-        title: event.eventDetails.summary,
-        type: 'event',
-        url: `/admin/calendar/${event._id}`,
-        start: event.eventDetails.scheduledTime,
-      }));
-
-      setSearchResults(formattedResults);
+    
+      const formattedResults: SearchResult[] = filteredEvents.map(event => {
+        const { summary, description, scheduledTime } = event.eventDetails;
+        console.log('✅ url: ', `/admin/calendar/${event._id}`);
+        return {
+          _id: event._id,
+          summary,
+          description,
+          scheduledTime,
+          type: 'event',
+          url: `/admin/calendar/${event._id}`
+         
+        };
+        
+      });
+   
+      setSearchResults(formattedResults); // ✅ Update state with results
+    
+    } catch (error) {
+      console.error('❌ Error during search:', error);
+      setSearchResults([]); // Optional: clear results on error
     } finally {
-      setIsSearching(false);
+      setIsSearching(false); // ✅ Always end the loading state
     }
   };
+    // try {
+    //   const searchTerm = query.trim().toLowerCase();
+
+    //   if (scheduledEvents.length > 0) {
+    //     console.log('✅ Events loaded:', scheduledEvents);
+    //   } else {
+    //     console.log('🚫 No events found');
+    //   }
+
+      
+    //   const filteredEvents = scheduledEvents.filter((event) => {
+    //     const summary = (event.eventDetails.summary || '').toLowerCase();
+    //     const description = (event.eventDetails.description || '').toLowerCase();
+    //     return summary.includes(searchTerm); 
+    //     // || description.includes(searchTerm);
+    //   });
+    //   console.log('Searching for:', searchTerm);
+    //   console.log('Total scheduledEvents available in context:', scheduledEvents);
+
+    //   const formattedResults: SearchResult[] = filteredEvents.map(event => ({
+    //     _id: event._id,
+    //     summary: event.eventDetails.summary,
+    //     description: event.eventDetails.description,
+    //     scheduledTime: event.eventDetails.scheduledTime,
+    //     type: 'event',
+    //     url: `/admin/calendar/${event._id}`         
+    //   }));
+     
+  
+
+  //     setSearchResults(formattedResults);
+  //   } finally {
+  //     setIsSearching(false);
+  //   }
+  // };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value;
@@ -64,14 +137,16 @@ const AppHeader: React.FC = () => {
     handleSearch(query);
   };
 
-  const handleResultClick = (eventId: string) => {
-    navigate('/calendar', {
+  const handleResultClick = (eventId: string) => {   
+    navigate(`/admin/calendar`, {
+    // navigate(`/admin/calendar/${eventId}`, {
       state: {
         selectedEventId: eventId,
         scrollToEvent: true
       }
     });
-
+    console.log('✅ url: ', `/admin/calendar/${eventId}`);
+    
     if (inputRef.current) {
       inputRef.current.value = '';
     }
@@ -96,7 +171,8 @@ const AppHeader: React.FC = () => {
     if (searchQuery.trim()) {
       handleSearch(searchQuery);
       if (searchResults.length > 0) {
-        handleResultClick(searchResults[0].id);
+         console.log('searchResults:', searchResults);
+        handleResultClick(searchResults[0]._id);
       }
     }
   };
@@ -254,16 +330,16 @@ const AppHeader: React.FC = () => {
               <div className="absolute top-full left-0 w-full mt-1 bg-white dark:bg-gray-800 rounded-lg shadow-lg max-h-96 overflow-y-auto z-50">
                 {searchResults.map((result) => (
                   <button
-                    key={result.id}
-                    onClick={() => handleResultClick(result.id)}
+                    key={result._id}
+                    onClick={() => handleResultClick(result._id)}
                     className="w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700"
                   >
                     <div className="font-medium text-gray-900 dark:text-gray-100">
-                      {result.title}
+                      {result.summary}
                     </div>
                     <div className="text-sm text-gray-500">
-                      {result.start
-                        ? new Date(result.start).toLocaleDateString()
+                      {result.scheduledTime
+                        ? new Date(result.scheduledTime).toLocaleDateString()
                         : 'No date'
                       }
                     </div>

@@ -95,8 +95,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
                 <UnsavedChangesProvider>
                   <SidebarProvider>
                     <SearchProvider>
-                      <ScheduledEventsProvider>
-                      
+                      <ScheduledEventsProvider>                      
                       <App />
                        </ScheduledEventsProvider>                        
                     </SearchProvider>
